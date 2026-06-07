@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contract Risk Engine — Francisco Costa</title>
+<meta name="description" content="Paste any contract and get a structured clause-by-clause risk analysis in seconds.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --surface-raised: #FAFAF8;
+    --border: #E2DFDA;
+    --border-strong: #C8C4BC;
+    --text-primary: #1A1916;
+    --text-secondary: #6B6760;
+    --text-tertiary: #9E9B96;
+    --accent: #1A1916;
+    --red-bg: #FDF0EF;
+    --red-text: #8B2020;
+    --red-border: #E8B4B0;
+    --amber-bg: #FDF5E8;
+    --amber-text: #7A4F0A;
+    --amber-border: #E8D4A0;
+    --green-bg: #EFF6EC;
+    --green-text: #2D6A1F;
+    --green-border: #B8D9B0;
+    --blue-bg: #EDF3FC;
+    --blue-text: #1A4A8A;
+    --blue-border: #B0C8EC;
+    --font-sans: 'DM Sans', system-ui, sans-serif;
+    --font-serif: 'Instrument Serif', Georgia, serif;
+    --font-mono: 'DM Mono', 'Courier New', monospace;
+    --radius: 6px;
+    --radius-lg: 10px;
+  }
+
+  html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 56px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text-primary);
+  }
+
+  .nav-logo {
+    width: 28px;
+    height: 28px;
+    background: var(--text-primary);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-logo svg { width: 14px; height: 14px; }
+
+  .nav-title {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .nav-links a {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .nav-links a:hover { color: var(--text-primary); }
+
+  .nav-badge {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+  }
+
+  /* HERO */
+  .hero {
+    padding: 4rem 2rem 3rem;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .hero-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 1rem;
+  }
+
+  .hero h1 {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--text-secondary);
+  }
+
+  .hero-desc {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    max-width: 520px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .hero-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+  }
+
+  .hero-meta-item svg { width: 13px; height: 13px; opacity: 0.6; }
+
+  /* MAIN LAYOUT */
+  .main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+  }
+
+  /* INPUT CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-raised);
+  }
+
+  .card-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .card-header-left svg { width: 14px; height: 14px; color: var(--text-secondary); }
+
+  .card-header-right {
+    display: flex;
+    gap: 6px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+
+  textarea {
+    display: block;
+    width: 100%;
+    min-height: 220px;
+    padding: 18px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.75;
+    color: var(--text-primary);
+    background: var(--surface);
+    border: none;
+    resize: vertical;
+    outline: none;
+  }
+
+  textarea::placeholder { color: var(--text-tertiary); }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    border-top: 1px solid var(--border);
+    background: var(--surface-raised);
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .card-footer-left {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--radius);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .btn svg { width: 13px; height: 13px; }
+
+  .btn-primary {
+    background: var(--text-primary);
+    color: #fff;
+    border-color: var(--text-primary);
+  }
+
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border-color: var(--border-strong);
+  }
+
+  .btn-ghost:hover { background: var(--bg); color: var(--text-primary); }
+
+  .char-count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    align-self: center;
+  }
+
+  /* PROCESSING */
+  #processing {
+    display: none;
+    text-align: center;
+    padding: 3rem 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-top: 1.5rem;
+  }
+
+  .processing-inner { display: inline-block; }
+
+  .processing-bar {
+    width: 180px;
+    height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 0 auto 16px;
+  }
+
+  .processing-fill {
+    height: 100%;
+    background: var(--text-primary);
+    border-radius: 2px;
+    animation: scan 1.4s ease-in-out infinite;
+    width: 60%;
+  }
+
+  @keyframes scan {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+  }
+
+  .processing-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+  }
+
+  .processing-steps {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .processing-step {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+    opacity: 0;
+    animation: fadeStep 0.4s forwards;
+  }
+
+  @keyframes fadeStep { to { opacity: 1; } }
+
+  /* RESULTS */
+  #results { display: none; margin-top: 1.5rem; }
+
+  /* SCORE HEADER */
+  .score-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    margin-bottom: 1rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .score-ring {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+  }
+
+  .score-ring svg { transform: rotate(-90deg); }
+
+  .score-ring-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score-number {
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .score-denom {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+    margin-top: 1px;
+  }
+
+  .score-info h2 {
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    margin-bottom: 5px;
+  }
+
+  .score-info p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* STAT ROW */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .stat-tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+
+  .stat-tile .label {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .stat-tile .value {
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .stat-tile .sub {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 3px;
+  }
+
+  /* CLAUSE LIST */
+  .section-heading {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 8px;
+    margin-top: 1.25rem;
+  }
+
+  .clause-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .clause-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: start;
+  }
+
+  .clause-item.risk-high { border-left: 3px solid var(--red-text); }
+  .clause-item.risk-medium { border-left: 3px solid #C4820A; }
+  .clause-item.risk-low { border-left: 3px solid var(--green-text); }
+
+  .clause-type {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+    letter-spacing: 0.03em;
+    margin-bottom: 4px;
+  }
+
+  .clause-finding {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .clause-excerpt {
+    margin-top: 6px;
+    font-size: 11.5px;
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+    font-style: italic;
+    padding: 6px 10px;
+    background: var(--bg);
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  .risk-badge {
+    display: inline-block;
+    font-size: 10.5px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.04em;
+    padding: 3px 9px;
+    border-radius: 4px;
+    white-space: nowrap;
+    border: 1px solid;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+
+  .badge-high { background: var(--red-bg); color: var(--red-text); border-color: var(--red-border); }
+  .badge-medium { background: var(--amber-bg); color: var(--amber-text); border-color: var(--amber-border); }
+  .badge-low { background: var(--green-bg); color: var(--green-text); border-color: var(--green-border); }
+
+  /* RECOMMENDATIONS */
+  .recs-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+
+  .rec-item {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    align-items: start;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--border);
+    gap: 0;
+  }
+
+  .rec-item:last-child { border-bottom: none; }
+
+  .rec-index {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    padding-top: 2px;
+  }
+
+  .rec-text {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* DISCLAIMER */
+  .disclaimer {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    line-height: 1.7;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    margin-bottom: 1rem;
+  }
+
+  .disclaimer strong { font-weight: 500; color: var(--text-secondary); }
+
+  /* RESET */
+  .result-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    padding: 1.5rem 2rem;
+    margin-top: 3rem;
+  }
+
+  .footer-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .footer-left {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .footer-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .footer-role {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .footer-links a {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .footer-links a:hover { color: var(--text-primary); }
+  .footer-links svg { width: 14px; height: 14px; }
+
+  .footer-divider {
+    width: 1px;
+    height: 14px;
+    background: var(--border);
+  }
+
+  /* UTIL */
+  .hidden { display: none !important; }
+
+  @media (max-width: 520px) {
+    nav { padding: 0 1rem; }
+    .hero { padding: 2.5rem 1rem 2rem; }
+    .main { padding: 0 1rem 3rem; }
+    .score-header { grid-template-columns: 1fr; }
+    .stat-row { grid-template-columns: repeat(3, 1fr); }
+    footer { padding: 1.25rem 1rem; }
+    .nav-links .nav-badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#">
+    <div class="nav-logo">
+      <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 3h10M2 7h6M2 11h8" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <span class="nav-title">Contract Risk Engine</span>
+  </a>
+  <div class="nav-links">
+    <a href="https://www.linkedin.com/in/francscosta/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://github.com/CS42-C?tab=repositories" target="_blank" rel="noopener">GitHub</a>
+    <span class="nav-badge">v1.0 — rules engine</span>
+  </div>
+</nav>
+
+<div class="hero">
+  <p class="hero-label">Portfolio project · Legal analytics</p>
+  <h1>Contract risk,<br><em>structured and scored.</em></h1>
+  <p class="hero-desc">
+    Paste any commercial contract and get a clause-by-clause risk analysis in seconds.
+    Built to demonstrate how legal reasoning and data tooling can work together.
+  </p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13z" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Analyses in ~2 seconds
+    </div>
+    <div class="hero-meta-item">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      8 clause types detected
+    </div>
+    <div class="hero-meta-item">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 4.5h12M2 8h8M2 11.5h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      LLM-ready architecture
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div id="input-view">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-left">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 2h6l4 4v8a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.2"/><path d="M10 2v4h4M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          contract.txt
+        </div>
+        <div class="card-header-right">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+      <textarea
+        id="contract-text"
+        placeholder="Paste your contract text here...&#10;&#10;The engine will identify: liability caps, termination rights, auto-renewal clauses, payment terms, IP ownership, indemnification, governing law, and confidentiality provisions."
+        oninput="updateCount()"
+        spellcheck="false"
+      ></textarea>
+      <div class="card-footer">
+        <div class="card-footer-left">
+          <button class="btn btn-primary" id="analyze-btn" onclick="analyze()">
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 2L14 8L8 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 8h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Run analysis
+          </button>
+          <button class="btn btn-ghost" onclick="loadSample()">Load sample</button>
+        </div>
+        <span class="char-count" id="char-count">0 characters</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="processing">
+    <div class="processing-inner">
+      <div class="processing-bar">
+        <div class="processing-fill"></div>
+      </div>
+      <div class="processing-label" id="processing-label">Parsing document structure</div>
+      <div class="processing-steps" id="processing-steps"></div>
+    </div>
+  </div>
+
+  <div id="results">
+    <!-- rendered by JS -->
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <span class="footer-name">Francisco Costa</span>
+      <span class="footer-role">Regulatory Frameworks · Data Analytics · Business Intelligence</span>
+    </div>
+    <div class="footer-links">
+      <a href="https://www.linkedin.com/in/francscosta/" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1.5" y="1.5" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M5 6.5v5M5 4.5v.5M8 11.5v-3a1.5 1.5 0 013 0v3M8 6.5v5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        LinkedIn
+      </a>
+      <div class="footer-divider"></div>
+      <a href="https://github.com/CS42-C?tab=repositories" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 11.5c-3 .9-3-1.5-4-2m8 4v-2.8a2.4 2.4 0 00-.7-1.8c2.3-.3 4.7-1.1 4.7-5a3.9 3.9 0 00-1-2.7 3.6 3.6 0 00-.1-2.6s-.8-.3-2.7 1a9.3 9.3 0 00-5 0C3.8 1.1 3 1.4 3 1.4a3.6 3.6 0 00-.1 2.6 3.9 3.9 0 00-1 2.7c0 3.9 2.4 4.7 4.7 5a2.4 2.4 0 00-.7 1.8v2.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        GitHub
+      </a>
+      <div class="footer-divider"></div>
+      <a href="mailto:franciscostabusiness@gmail.com">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 5l6.5 4 6.5-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Contact
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const SAMPLE = `SERVICE AGREEMENT
+
+This Agreement is entered into between Acme Corp ("Client") and TechSolutions Ltd ("Provider").
+
+1. TERM AND TERMINATION
+This Agreement shall commence on the Effective Date and continue for a period of three (3) years. Either party may terminate this Agreement for convenience upon ninety (90) days written notice. Provider may terminate immediately upon Client's material breach.
+
+2. LIABILITY
+Provider's total liability under this Agreement shall not exceed EUR 500 (five hundred euros), regardless of the nature of the claim, whether in contract, tort, or otherwise. In no event shall either party be liable for indirect, consequential, or punitive damages.
+
+3. PAYMENT TERMS
+Client shall pay all invoices within sixty (60) days of receipt. Late payments shall accrue interest at 15% per annum. Provider may suspend services after 5 days of non-payment without liability.
+
+4. INTELLECTUAL PROPERTY
+All work product, inventions, and developments created by Provider under this Agreement shall be the exclusive property of Provider. Client receives a non-exclusive, non-transferable licence to use deliverables solely for internal purposes.
+
+5. INDEMNIFICATION
+Client shall indemnify, defend, and hold harmless Provider from any and all claims, losses, damages, and expenses arising from Client's use of the services. Provider's indemnification obligations are limited to direct damages caused by Provider's gross negligence.
+
+6. GOVERNING LAW AND DISPUTE RESOLUTION
+This Agreement shall be governed by the laws of the Cayman Islands. All disputes shall be resolved by binding arbitration in Singapore, with each party bearing its own legal costs.
+
+7. AUTO-RENEWAL
+This Agreement shall automatically renew for successive one-year periods unless either party provides written notice of non-renewal at least one hundred and eighty (180) days prior to the expiration of the then-current term.
+
+8. CONFIDENTIALITY
+Provider may disclose Client's confidential information to third parties as necessary for the provision of services, without requiring Client's prior consent.`;
+
+function loadSample() {
+  document.getElementById('contract-text').value = SAMPLE;
+  updateCount();
+}
+
+function updateCount() {
+  const len = document.getElementById('contract-text').value.length;
+  document.getElementById('char-count').textContent = len.toLocaleString() + ' character' + (len !== 1 ? 's' : '');
+}
+
+const PROCESSING_STEPS = [
+  'Tokenising document...',
+  'Identifying clause boundaries...',
+  'Extracting key provisions...',
+  'Scoring risk vectors...',
+  'Generating recommendations...'
+];
+
+function analyze() {
+  const text = document.getElementById('contract-text').value.trim();
+  if (!text) return;
+
+  document.getElementById('input-view').style.display = 'none';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('processing').style.display = 'block';
+
+  const stepsEl = document.getElementById('processing-steps');
+  const labelEl = document.getElementById('processing-label');
+  stepsEl.innerHTML = '';
+
+  let stepIdx = 0;
+  const stepInterval = setInterval(() => {
+    if (stepIdx < PROCESSING_STEPS.length) {
+      labelEl.textContent = PROCESSING_STEPS[stepIdx];
+      const s = document.createElement('div');
+      s.className = 'processing-step';
+      s.style.animationDelay = '0s';
+      s.textContent = '✓ ' + PROCESSING_STEPS[stepIdx];
+      if (stepIdx > 0) stepsEl.appendChild(s);
+      stepIdx++;
+    }
+  }, 340);
+
+  setTimeout(() => {
+    clearInterval(stepInterval);
+    const report = generateReport(text);
+    renderResults(report);
+    document.getElementById('processing').style.display = 'none';
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 1900);
+}
+
+function generateReport(text) {
+  const t = text.toLowerCase();
+  const clauses = [];
+
+  if (t.includes('liability') && t.includes('not exceed')) {
+    const capMatch = /not exceed\s+(eur|€|\$|gbp|usd)?\s*([\d,]+)/i.exec(text);
+    const capVal = capMatch ? parseInt(capMatch[2].replace(/,/g, '')) : null;
+    const liabExcerpt = (() => {
+      const idx = t.indexOf('not exceed');
+      return idx > -1 ? text.substring(Math.max(0, idx - 20), idx + 80).trim() : null;
+    })();
+    clauses.push({
+      type: 'Liability cap',
+      risk: capVal !== null && capVal < 10000 ? 'high' : 'medium',
+      finding: capVal !== null && capVal < 10000
+        ? `Liability is capped at a fixed amount of ${capVal.toLocaleString()} — disproportionately low for most commercial engagements and insufficient to cover realistic loss scenarios.`
+        : 'Liability cap detected. Verify the cap amount against expected contract value and ensure it covers realistic exposure.',
+      excerpt: liabExcerpt,
+      icon: '⊘'
+    });
+  }
+
+  if (t.includes('terminat')) {
+    const immediateTerm = t.includes('terminate immediately') || t.includes('immediate termination');
+    const convenientTerm = t.includes('for convenience') || t.includes('without cause');
+    clauses.push({
+      type: 'Termination rights',
+      risk: immediateTerm && !t.includes('material breach') ? 'high' : convenientTerm ? 'low' : 'low',
+      finding: immediateTerm
+        ? 'Immediate termination right detected. Verify whether it is symmetric or available only to one party, and whether conditionality on material breach is adequately defined.'
+        : convenientTerm
+        ? 'Termination for convenience clause present. Ensure notice periods are commercially adequate and exit costs are clearly defined.'
+        : 'Standard termination clause. Review notice periods for commercial adequacy.',
+      excerpt: null
+    });
+  }
+
+  if (t.includes('auto') && (t.includes('renew') || t.includes('renewal'))) {
+    const noticeMatch = /(\d+)\s*days\s*(prior|before|in advance)/i.exec(text);
+    const noticeDays = noticeMatch ? parseInt(noticeMatch[1]) : 0;
+    clauses.push({
+      type: 'Auto-renewal',
+      risk: noticeDays >= 120 ? 'high' : 'medium',
+      finding: noticeDays >= 120
+        ? `Auto-renewal requires ${noticeDays} days advance notice to opt out — an unusually long window that creates high risk of unintended commitment if the contract is not actively monitored.`
+        : 'Auto-renewal clause detected. Ensure the opt-out deadline is tracked in your contract management system.',
+      excerpt: null
+    });
+  }
+
+  if (t.includes('payment') || t.includes('invoice')) {
+    const daysMatch = /(\d+)\s*days?\s*(of receipt|from receipt|after receipt|of invoice)/i.exec(text);
+    const days = daysMatch ? parseInt(daysMatch[1]) : null;
+    const highInterest = /interest.{0,30}(1[5-9]|[2-9]\d)%/i.test(text);
+    clauses.push({
+      type: 'Payment terms',
+      risk: highInterest ? 'high' : days && days > 45 ? 'medium' : 'low',
+      finding: highInterest
+        ? 'Late payment interest rate is punitive. This creates disproportionate financial exposure for minor or administrative payment delays.'
+        : days && days > 45
+        ? `Payment terms of ${days} days exceed standard commercial practice (30 days). This may create cash flow friction.`
+        : 'Payment terms appear within standard range. Confirm the late payment interest rate.',
+      excerpt: null
+    });
+  }
+
+  if (t.includes('intellectual property') || t.includes('work product') || t.includes('inventions')) {
+    const providerOwns = t.includes('exclusive property of provider') || t.includes('provider shall own') || t.includes('provider retains');
+    clauses.push({
+      type: 'Intellectual property',
+      risk: providerOwns ? 'high' : 'medium',
+      finding: providerOwns
+        ? 'All work product is assigned exclusively to the Provider. The Client receives only a limited licence. This is atypical for bespoke development or consulting engagements and warrants renegotiation.'
+        : 'IP clause detected. Verify whether commissioned deliverables transfer to the Client or remain with the Provider.',
+      excerpt: null
+    });
+  }
+
+  if (t.includes('indemnif')) {
+    const clientOnly = t.includes('client shall indemnify') && !t.includes('provider shall indemnify');
+    const limitedProvider = t.includes("provider's indemnification") && t.includes('limited');
+    clauses.push({
+      type: 'Indemnification',
+      risk: clientOnly ? 'high' : limitedProvider ? 'medium' : 'low',
+      finding: clientOnly
+        ? "Indemnification appears one-sided: Client bears broad exposure while Provider's obligations are narrowly limited to gross negligence only. This asymmetry is a material commercial imbalance."
+        : limitedProvider
+        ? "Provider's indemnification scope is limited. Assess whether the limitations are proportionate to the risk profile of the engagement."
+        : 'Mutual indemnification detected. Verify symmetry of obligations and any carve-outs.',
+      excerpt: null
+    });
+  }
+
+  if (t.includes('governing law') || t.includes('governed by')) {
+    const offshore = ['cayman', 'british virgin', 'bermuda', 'panama', 'isle of man'].some(j => t.includes(j));
+    const remote = t.includes('singapore') || t.includes('hong kong') || t.includes('dubai');
+    clauses.push({
+      type: 'Governing law & dispute resolution',
+      risk: offshore ? 'high' : remote ? 'medium' : 'low',
+      finding: offshore
+        ? 'Governing law is set to an offshore jurisdiction with limited transparency. This may create significant enforcement challenges in the event of a dispute.'
+        : remote
+        ? 'Dispute resolution seat is geographically remote. Consider whether arbitration in this jurisdiction is practical for anticipated dispute values.'
+        : 'Governing law appears to be a standard commercial jurisdiction. Confirm the dispute resolution mechanism is suitable.',
+      excerpt: null
+    });
+  }
+
+  if (t.includes('confidential')) {
+    const weak = t.includes('may disclose') && t.includes('third parties') && !t.includes('prior consent');
+    clauses.push({
+      type: 'Confidentiality',
+      risk: weak ? 'high' : 'low',
+      finding: weak
+        ? 'Confidentiality clause permits disclosure to third parties without Client consent. This is a material weakness, particularly for regulated or sensitive information.'
+        : 'Confidentiality clause present. Review scope, duration, and permitted disclosure carve-outs.',
+      excerpt: null
+    });
+  }
+
+  if (clauses.length === 0) {
+    clauses.push({
+      type: 'General review',
+      risk: 'medium',
+      finding: 'No structured clause patterns detected. The document may use non-standard language or lack formal headings. Manual review recommended.',
+      excerpt: null
+    });
+  }
+
+  const highCount = clauses.filter(c => c.risk === 'high').length;
+  const medCount = clauses.filter(c => c.risk === 'medium').length;
+  const score = Math.min(95, Math.max(8, highCount * 22 + medCount * 8 + 8));
+
+  const recs = [];
+  if (clauses.some(c => c.type === 'Liability cap' && c.risk === 'high'))
+    recs.push('Renegotiate the liability cap. A fixed low-value cap is commercially unreasonable; standard market practice is 1–2x the annual contract value.');
+  if (clauses.some(c => c.type === 'Intellectual property' && c.risk === 'high'))
+    recs.push('Request IP assignment to Client for all bespoke deliverables. A licence-only arrangement is insufficient where custom work product is the primary subject of the contract.');
+  if (clauses.some(c => c.type === 'Indemnification' && c.risk === 'high'))
+    recs.push('Seek symmetric indemnification obligations. One-sided indemnification exposes the Client to disproportionate liability relative to the Provider.');
+  if (clauses.some(c => c.type === 'Governing law & dispute resolution' && c.risk === 'high'))
+    recs.push('Negotiate governing law to a transparent and accessible jurisdiction. Offshore governing law materially complicates enforcement and increases legal costs.');
+  if (clauses.some(c => c.type === 'Auto-renewal' && c.risk !== 'low'))
+    recs.push('Log the opt-out notice deadline in a contract management system immediately. A 180-day window is uncommonly long and operationally easy to miss.');
+  if (clauses.some(c => c.type === 'Confidentiality' && c.risk === 'high'))
+    recs.push('Amend the confidentiality clause to require prior written consent before any third-party disclosure, with defined exceptions (e.g. legal obligation, affiliated entities).');
+  if (clauses.some(c => c.type === 'Payment terms' && c.risk === 'high'))
+    recs.push('Cap or reduce the late payment interest rate. Rates above 8–10% are punitive and may not reflect genuine commercial intent.');
+  if (recs.length === 0)
+    recs.push('No critical recommendations at this stage. Proceed with a standard legal review before execution.');
+
+  return { clauses, score, highCount, medCount, recs, total: clauses.length };
+}
+
+function riskColor(risk) {
+  return risk === 'high' ? '#8B2020' : risk === 'medium' ? '#7A4F0A' : '#2D6A1F';
+}
+
+function renderResults(r) {
+  const ringColor = r.score >= 60 ? '#8B2020' : r.score >= 30 ? '#C4820A' : '#2D6A1F';
+  const ringBg = r.score >= 60 ? '#FDF0EF' : r.score >= 30 ? '#FDF5E8' : '#EFF6EC';
+  const scoreLabel = r.score >= 60 ? 'High risk' : r.score >= 30 ? 'Moderate risk' : 'Lower risk';
+  const scoreSummary = r.score >= 60
+    ? `${r.highCount} high-risk clause${r.highCount !== 1 ? 's' : ''} identified. Legal review and renegotiation recommended before signing.`
+    : r.score >= 30
+    ? `${r.medCount} clause${r.medCount !== 1 ? 's' : ''} require attention before execution.`
+    : 'No critical issues identified. Standard legal review recommended before signing.';
+
+  const circumference = 2 * Math.PI * 32;
+  const dashOffset = circumference - (r.score / 100) * circumference;
+
+  const clauseHTML = r.clauses.map(c => `
+    <div class="clause-item risk-${c.risk}">
+      <div>
+        <div class="clause-type">${c.type}</div>
+        <div class="clause-finding">${c.finding}</div>
+        ${c.excerpt ? `<div class="clause-excerpt">"${c.excerpt.replace(/"/g,'&quot;')}"</div>` : ''}
+      </div>
+      <span class="risk-badge badge-${c.risk}">${c.risk} risk</span>
+    </div>
+  `).join('');
+
+  const recHTML = r.recs.map((rec, i) => `
+    <div class="rec-item">
+      <span class="rec-index">0${i + 1}</span>
+      <span class="rec-text">${rec}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('results').innerHTML = `
+    <div class="score-header">
+      <div class="score-ring">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="32" fill="${ringBg}" stroke="${ringBg}" stroke-width="0"/>
+          <circle cx="40" cy="40" r="32" fill="none" stroke="#E2DFDA" stroke-width="6"/>
+          <circle cx="40" cy="40" r="32" fill="none" stroke="${ringColor}" stroke-width="6"
+            stroke-dasharray="${circumference.toFixed(1)}"
+            stroke-dashoffset="${dashOffset.toFixed(1)}"
+            stroke-linecap="round"/>
+        </svg>
+        <div class="score-ring-text">
+          <span class="score-number" style="color:${ringColor}">${r.score}</span>
+          <span class="score-denom">/100</span>
+        </div>
+      </div>
+      <div class="score-info">
+        <h2>${scoreLabel}</h2>
+        <p>${scoreSummary}</p>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-tile">
+        <div class="label">Clauses found</div>
+        <div class="value">${r.total}</div>
+        <div class="sub">from document</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">High risk</div>
+        <div class="value" style="color:${r.highCount > 0 ? '#8B2020' : 'inherit'}">${r.highCount}</div>
+        <div class="sub">need renegotiation</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">Medium risk</div>
+        <div class="value" style="color:${r.medCount > 0 ? '#7A4F0A' : 'inherit'}">${r.medCount}</div>
+        <div class="sub">need attention</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Clause analysis</div>
+    <div class="clause-list">${clauseHTML}</div>
+
+    <div class="section-heading">Recommendations</div>
+    <div class="recs-card">${recHTML}</div>
+
+    <div class="disclaimer">
+      <strong>Note:</strong> This analysis is generated by a deterministic rules engine and does not constitute legal advice.
+      In production, this layer is replaced by an LLM (Claude API) for deeper semantic clause extraction.
+      Always review with qualified legal counsel before signing any agreement.
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-ghost" onclick="reset()">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:13px;height:13px"><path d="M2 8a6 6 0 106-6H6M2 8L4.5 5.5M2 8L4.5 10.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Analyse another contract
+      </button>
+    </div>
+  `;
+}
+
+function reset() {
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('contract-text').value = '';
+  document.getElementById('char-count').textContent = '0 characters';
+  document.getElementById('input-view').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
