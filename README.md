@@ -5,7 +5,7 @@ Built a contract risk scoring engine that reads commercial agreements and flags 
 
 A browser-based tool that reads commercial contract text and produces a structured, clause-by-clause risk analysis. No backend, no dependencies, no API calls — just paste a contract and get a report in under two seconds.
 
-Live demo: 
+Live demo: https://cs42-c.github.io/Contract-Risk-Engine/
 
 ---
 
